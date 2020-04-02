@@ -11,7 +11,7 @@
 
 import arcpy
 import os
-
+ 
 arcpy.env.overwriteOutput=True        
     
 # Set workspace, input and output names
@@ -26,12 +26,6 @@ prj = arcpy.mp.ArcGISProject(project)
 prj.defaultGeodatabase = wsGDB
 # set service variable for later use
 service = "GasText_Published"
-# Set map to use from project
-annoMap = prj.listMaps(service)[0]
-
-# Remove existing layers
-for lyr in annoMap.listLayers():
-    annoMap.removeLayer(lyr)
 
 # Create a temporary SDE c onnection
 sdeAL = arcpy.CreateDatabaseConnection_management(ws,'tempALServ.sde',\
@@ -40,16 +34,15 @@ sdeAL = arcpy.CreateDatabaseConnection_management(ws,'tempALServ.sde',\
                                                  'DATABASE_AUTH', 'GISADMIN',\
                                                  'gisadmin','SAVE_USERNAME')
 print("Database connection created at {0} to the Alabama Database.".format(ws))
+print("\n")
 
 # Copy all annotation features to the GDB, overwrite if already present
-# The list below is the test list
-gasList = ['ServiceText', 'MainText']
-# gasList = ['ServiceText', 'MainText', 'CasingText','ValveText','FittingText',\
-#           'RetiredMainText','RetiredServiceText','RegulatorStationText',\
-#            'StopperFittingText','MainAuthorizationNumberText']
-# landList = ['MiscellaneousText','LeaderLine','HookLeader','StationPlus',\
-#            'DetailAnnotation','Notes','LocationMeasurement']
-# project '\GISADMIN.ProjectData\GISADMIN.ProjectBoundary
+gasList = ['ServiceText', 'MainText', 'CasingText','ValveText','FittingText',\
+            'RetiredMainText','RetiredServiceText','RegulatorStationText',\
+            'StopperFittingText','MainAuthorizationNumberText', 'TownBorderStationText']
+landList = ['MiscellaneousText','LeaderLine','HookLeader','StationPlus',\
+            'DetailAnnotation','Notes','LocationMeasurement', 'DetailPolygon',\
+            'PavementText','MiscellaneousLines','ROWText']
 
 # Iterate through all desired variables in gasList    
 for item in gasList:
@@ -60,21 +53,49 @@ for item in gasList:
         print("The annotation layer {0} was found at {1}.".format(item,inputFC))
         # Set output path
         outPath = os.path.join(wsGDB, item)
+        outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
+        print("The feature {0} has been copied to {1}.".format(item, outPath))
+        print("Upgrading the dataset now...")
+        print("\n")
+        arcpy.UpgradeDataset_management(outputFC)
         # If the path exists, delete it first and then copy features
-        if arcpy.Exists(outPath):
-            print("The feature {0} already exists in the database and will be overwritten.".format(outPath))
-            arcpy.Delete_management(outPath)
-            outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
-        # If the path doesn't exist, copy features
-        else:
-            print("The feature {0} does not yet exist and will be created.".format(outPath))
-            outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
-            print("A copy has been created at {0}.".format(outputFC))            
+#        if arcpy.Exists(outPath):
+#            print("The feature {0} already exists in the database and will be overwritten.".format(outPath))
+#            arcpy.Delete_management(outPath)
+#            outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
+#            print("\n")
+#        # If the path doesn't exist, copy features
+#        else:
+#            print("The feature {0} does not yet exist and will be created.".format(outPath))
+#            outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
+#            print("A copy has been created at {0}.".format(outputFC))
+#            print("\n")        
     else:
         print("The feature class {0} could not be found in the AL SDE. Verify the name is correct.")
+        print("\n")
         break
-    annoMap.addLayer(outputFC)
-    arcpy.UpgradeDataset_management(outputFC)     
+
+for item in landList:
+    # Set the input FC to be copied
+    inputFC = sdeAL.getOutput(0) + '\GISADMIN.Landbase\GISADMIN.' + item
+    # If the input FC exists (this is for security in case afeature class name changes)
+    if arcpy.Exists(inputFC):
+        print("The annotation layer {0} was found at {1}.".format(item,inputFC))
+        # Set output path
+        outPath = os.path.join(wsGDB, item)
+        outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
+        print("The feature {0} has been copied to {1}.".format(item, outPath))
+        desc = arcpy.Describe(outputFC)
+        if desc.featureType == 'Annotation':
+            print("Upgrading the dataset now...")
+            print("\n")
+            arcpy.UpgradeDataset_management(outputFC)
+    else:
+        print("The feature class {0} could not be found in the AL SDE. Verify the name is correct.")
+        print("\n")
+        break
+
+
    
 arcpy.env.workspace = ""
 print("Removing temporary SDE Connection Files.")
