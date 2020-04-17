@@ -1,6 +1,6 @@
 # Project: AL Web Map - Annotations
 # Create Date: 03/24/2020
-# Last Updated: 03/26/2020
+# Last Updated: 04/17/2020
 # Create by: Robert Domiano
 # Updated by: 
 # Purpose: To create a current copy of Spire AL annotation FC's and upgrade them using Pro's Upgrade Dataset tool.
@@ -19,11 +19,11 @@ ws = r"D:\GisServerManager\Data\ALWebViewer_Annotation"
 # Set workspace gdb
 wsGDB = r"D:\GisServerManager\Data\ALWebViewer_Annotation\ALWebViewer.gdb"
 # Set project
-#project = r"C:\Users\GISADMIN\Documents\ArcGIS\Projects\ALWebViewer\ALWebViewer.aprx"
-## Declare project as project
-#prj = arcpy.mp.ArcGISProject(project)
-## set default gdb
-#prj.defaultGeodatabase = wsGDB
+project = r"C:\Users\GISADMIN\Documents\ArcGIS\Projects\ALWebViewer\ALWebViewer.aprx"
+# Declare project as project
+prj = arcpy.mp.ArcGISProject(project)
+# set default gdb
+prj.defaultGeodatabase = wsGDB
 # set service variable for later use
 service = "GasText_Published"
 
@@ -43,6 +43,7 @@ gasList = ['ServiceText', 'MainText', 'CasingText','ValveText','FittingText',\
 landList = ['MiscellaneousText','LeaderLine','HookLeader','StationPlus',\
             'DetailAnnotation','Notes','LocationMeasurement', 'DetailPolygon',\
             'PavementText','MiscellaneousLines','ROWText']
+lotID = ['LotID']
 
 # Iterate through all desired variables in gasList    
 for item in gasList:
@@ -73,7 +74,7 @@ for item in gasList:
     else:
         print("The feature class {0} could not be found in the AL SDE. Verify the name is correct.")
         print("\n")
-        break
+        
 
 for item in landList:
     # Set the input FC to be copied
@@ -93,7 +94,20 @@ for item in landList:
     else:
         print("The feature class {0} could not be found in the AL SDE. Verify the name is correct.")
         print("\n")
-        break
+        
+for item in lotID:
+    # Set the input FC to be copied
+    inputFC = r'\\gisappser2\GIS_Coordinator\ArcGIS_Online\PublishedLayers_Portal\Spire_Gulf_MS_Portal\Mobile_LotID.gdb\Data' + item
+    # If the input FC exists (this is for security in case afeature class name changes)
+    if arcpy.Exists(inputFC):
+        print("The annotation layer {0} was found at {1}.".format(item,inputFC))
+        # Set output path
+        outPath = os.path.join(wsGDB, item)
+        outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
+        print("The feature {0} has been copied to {1}.".format(item, outPath))
+        print("Upgrading the dataset now...")
+        print("\n")
+        arcpy.UpgradeDataset_management(outputFC)
 
 
    
