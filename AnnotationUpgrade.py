@@ -17,7 +17,7 @@ arcpy.env.overwriteOutput=True
 # Set workspace, input and output names
 ws = r"D:\GisServerManager\Data\ALWebViewer_Annotation"
 # Set workspace gdb
-wsGDB = r"D:\GisServerManager\Data\ALWebViewer_Annotation\ALWebViewer.gdb"
+wsGDB = r"D:\GisServerManager\Data\ALWebViewer_Annotation\ALWebViewer_Annotation.gdb"
 # Set project
 project = r"C:\Users\GISADMIN\Documents\ArcGIS\Projects\ALWebViewer\ALWebViewer.aprx"
 # Declare project as project
