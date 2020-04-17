@@ -15,15 +15,15 @@ import os
 arcpy.env.overwriteOutput=True        
     
 # Set workspace, input and output names
-ws = r"\\gisappser2\gis_coordinator\ArcGIS_Online\PublishedLayers_Portal\Alagasco\MAGI Online Gas Features"
+ws = r"D:\GisServerManager\Data\ALWebViewer_Annotation"
 # Set workspace gdb
-wsGDB = r"\\gisappser2\gis_coordinator\ArcGIS_Online\PublishedLayers_Portal\Alagasco\MAGI Online Gas Features\ALWebViewer.gdb"
+wsGDB = r"D:\GisServerManager\Data\ALWebViewer_Annotation\ALWebViewer.gdb"
 # Set project
-project = r"C:\Users\GISADMIN\Documents\ArcGIS\Projects\ALWebViewer\ALWebViewer.aprx"
-# Declare project as project
-prj = arcpy.mp.ArcGISProject(project)
-# set default gdb
-prj.defaultGeodatabase = wsGDB
+#project = r"C:\Users\GISADMIN\Documents\ArcGIS\Projects\ALWebViewer\ALWebViewer.aprx"
+## Declare project as project
+#prj = arcpy.mp.ArcGISProject(project)
+## set default gdb
+#prj.defaultGeodatabase = wsGDB
 # set service variable for later use
 service = "GasText_Published"
 
