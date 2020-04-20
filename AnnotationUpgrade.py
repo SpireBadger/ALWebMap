@@ -97,7 +97,7 @@ for item in landList:
         
 for item in lotID:
     # Set the input FC to be copied
-    inputFC = r'\\gisappser2\GIS_Coordinator\ArcGIS_Online\PublishedLayers_Portal\Spire_Gulf_MS_Portal\Mobile_LotID.gdb\Data' + item
+    inputFC = r'\\gisappser2\GIS_Coordinator\ArcGIS_Online\PublishedLayers_Portal\Spire_Gulf_MS_Portal\Mobile_LotID.gdb\Data\\' + item
     # If the input FC exists (this is for security in case afeature class name changes)
     if arcpy.Exists(inputFC):
         print("The annotation layer {0} was found at {1}.".format(item,inputFC))
