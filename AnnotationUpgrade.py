@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------------
 
 import arcpy
-import os
+import os, datetime, sys
  
 arcpy.env.overwriteOutput=True        
     
@@ -26,6 +26,14 @@ prj = arcpy.mp.ArcGISProject(project)
 prj.defaultGeodatabase = wsGDB
 # set service variable for later use
 service = "GasText_Published"
+
+# Create a text file to log the results
+date = datetime.datetime.now()
+logName = "LogFile.txt"
+logPath = os.path.join(ws, logName)
+sys.stdout = open(logPath, "w")
+print("Log:" + str(date))
+print("\n")
 
 # Create a temporary SDE c onnection
 sdeAL = arcpy.CreateDatabaseConnection_management(ws,'tempALServ.sde',\
@@ -43,7 +51,7 @@ gasList = ['ServiceText', 'MainText', 'CasingText','ValveText','FittingText',\
 landList = ['MiscellaneousText','LeaderLine','HookLeader','StationPlus',\
             'DetailAnnotation','Notes','LocationMeasurement', 'DetailPolygon',\
             'PavementText','MiscellaneousLines','ROWText']
-lotID = ['LotID']
+#lotID = ['LotID']
 
 # Iterate through all desired variables in gasList    
 for item in gasList:
@@ -74,8 +82,8 @@ for item in gasList:
     else:
         print("The feature class {0} could not be found in the AL SDE. Verify the name is correct.")
         print("\n")
-        
 
+# This section goes through the LandList list of annotation features from the AL SDE.        
 for item in landList:
     # Set the input FC to be copied
     inputFC = sdeAL.getOutput(0) + '\GISADMIN.Landbase\GISADMIN.' + item
@@ -95,23 +103,27 @@ for item in landList:
         print("The feature class {0} could not be found in the AL SDE. Verify the name is correct.")
         print("\n")
         
-for item in lotID:
-    # Set the input FC to be copied
-    inputFC = "\\\\gisappser2\\GIS_Coordinator\\ArcGIS_Online\\PublishedLayers_Portal\\Spire_Gulf_MS_Portal\\Mobile_LotID.gdb\Data\\" + item
-    # If the input FC exists (this is for security in case afeature class name changes)
-    if arcpy.Exists(inputFC):
-        print("The annotation layer {0} was found at {1}.".format(item,inputFC))
-        # Set output path
-        outPath = os.path.join(wsGDB, item)
-        outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
-        print("The feature {0} has been copied to {1}.".format(item, outPath))
-        print("Upgrading the dataset now...")
-        print("\n")
-        arcpy.UpgradeDataset_management(outputFC)
+#for item in lotID:
+#    # Set the input FC to be copied
+#    inputFC = "\\\\gisappser2\\GIS_Coordinator\\ArcGIS_Online\\PublishedLayers_Portal\\Spire_Gulf_MS_Portal\\Mobile_LotID.gdb\Data\\" + item
+#    # If the input FC exists (this is for security in case afeature class name changes)
+#    if arcpy.Exists(inputFC):
+#        print("The annotation layer {0} was found at {1}.".format(item,inputFC))
+#        # Set output path
+#        outPath = os.path.join(wsGDB, item)
+#        outputFC = arcpy.CopyFeatures_management(inputFC, outPath)
+#        print("The feature {0} has been copied to {1}.".format(item, outPath))
+#        print("Upgrading the dataset now...")
+#        print("\n")
+#        arcpy.UpgradeDataset_management(outputFC)
 
 
-   
+  
+# Clear out the workspace, this allows os.remove to delete the SDE connection file created.
 arcpy.env.workspace = ""
 print("Removing temporary SDE Connection Files.")
+#Remove the SDE
 os.remove(sdeAL.getOutput(0))
+# Close the log file
+sys.stdout.close()
         
